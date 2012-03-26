@@ -81,7 +81,7 @@ myUpdate = updatePointer (Relative 0 0)
 myManageHook = manageScratchPad <+> manageDocks
 --myManageHook = manageScratchPad
 
-myUnboundKeys = ["M-,", "M-."]
+myUnboundKeys = ["M-,", "M-.", "S-M-q"]
 
 myKeys = [ ("M-z", scratchPad),
            ("S-M-c", kill1),
