@@ -78,28 +78,16 @@ myBarHook h = dynamicLogWithPP $ defaultPP
 
 myUpdate = updatePointer (Relative 0 0)
 
-myManageHook = manageScratchPad <+> manageDocks
 --myManageHook = manageScratchPad
-
-myUnboundKeys = ["M-,", "M-.", "S-M-q"]
-
-myKeys = [ ("M-z", scratchPad),
-           ("S-M-c", kill1),
-           ("M-[", windowPromptBringCopy defaultXPConfig),
-           
-           -- misc testing
-           --("M-`", xmonadPrompt defaultXPConfig),
-           
-           -- inconvenient bindings for testing
-           ("S-M-=", withFocused (\f -> sendMessage (MinimizeWin f))),
-           ("S-M--", sendMessage RestoreNextMinimizedWin)
-           --("S-M-=", kill1),
-           --("S-M--", windowPromptBringCopy defaultXPConfig)
-         ]
+--myManageHook = manageScratchPad <+> manageDocks
+myManageHook = composeAll [ manageScratchPad
+                          , manageDocks
+                          , namedScratchpadManageHook scratchpads
+                          ]
 
 manageScratchPad :: ManageHook
 manageScratchPad = scratchpadManageHook (W.RationalRect l t w h)
-  where
+   where
     -- h = 0.1     -- terminal height, 10% 
     -- w = 1       -- terminal width, 100%
     -- t = 1 - h   -- distance from top edge, 90%
@@ -115,12 +103,33 @@ manageScratchPad = scratchpadManageHook (W.RationalRect l t w h)
 --scratchPad = scratchpadSpawnActionCustom myTerminal    
 scratchPad = scratchpadSpawnActionTerminal myTerminal
 
--- scratchpads = [
---   NS "foo" "" 
---     (title =? "Foo") 
---     (customFloating $ W.RationalRect (1/6) (1/6) (2/3) (2/3))
--- ]
+scratchpads = [
+  NS "term2" "xterm -name Term2" (resource =? "Term2") (customFloating $ W.RationalRect l0 t0 w0 h0)
+  ] where
+  h0 = 0.33
+  w0 = 0.45
+  t0 = 0
+  l0 = 1-w0
   
+actionT2 = namedScratchpadAction scratchpads "term2"
+
+myUnboundKeys = ["M-,", "M-.", "S-M-q"]
+
+myKeys = [ ("M-z", scratchPad),
+           ("S-M-c", kill1),
+           ("M-[", windowPromptBringCopy defaultXPConfig),
+           
+           -- misc testing
+           --("M-`", xmonadPrompt defaultXPConfig),
+           ("M-`", actionT2),
+           
+           -- inconvenient bindings for testing
+           ("S-M-=", withFocused (\f -> sendMessage (MinimizeWin f))),
+           ("S-M--", sendMessage RestoreNextMinimizedWin)
+           --("S-M-=", kill1),
+           --("S-M--", windowPromptBringCopy defaultXPConfig)
+         ]
+
 -- faq: screens in wrong order
 extraKeys = [] ++ 
          [  (mask ++ "M-" ++ [key], screenWorkspace scr >>= flip whenJust (windows . action))
@@ -134,7 +143,6 @@ modm = mod4Mask
 -- xmobar
 -- http://www.linuxandlife.com/2011/11/how-to-configure-xmonad-arch-linux.html
 -- end xmobar
-
 
 main = do
   spawn secondStatsBar
